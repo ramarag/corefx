@@ -2868,7 +2868,7 @@ namespace System.Runtime.ConstrainedExecution
         WillNotCorruptState = 3,
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(1133), Inherited=false)]
-    internal sealed partial class ReliabilityContractAttribute : System.Attribute
+    public sealed partial class ReliabilityContractAttribute : System.Attribute
     {
         public ReliabilityContractAttribute(System.Runtime.ConstrainedExecution.Consistency consistencyGuarantee, System.Runtime.ConstrainedExecution.Cer cer) { }
         public System.Runtime.ConstrainedExecution.Cer Cer { get { return default(System.Runtime.ConstrainedExecution.Cer); } }
@@ -3275,6 +3275,21 @@ namespace System.Configuration.Assemblies
         SameProcess         = 2,
         SameDomain          = 3,
     }
+  [System.ObsoleteAttribute("The AssemblyHash class has been deprecated. http://go.microsoft.com/fwlink/?linkid=14202")]
+  [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+  public partial struct AssemblyHash : System.ICloneable {
+      public static readonly System.Configuration.Assemblies.AssemblyHash Empty;
+      public AssemblyHash(byte[] value) { throw new System.NotImplementedException(); }
+      public AssemblyHash(System.Configuration.Assemblies.AssemblyHashAlgorithm algorithm, byte[] value) { throw new System.NotImplementedException(); }
+      public System.Configuration.Assemblies.AssemblyHashAlgorithm Algorithm 
+      { 
+          get { return default(System.Configuration.Assemblies.AssemblyHashAlgorithm); } 
+          set { } 
+      }
+      public object Clone() { return default(object); }
+      public byte[] GetValue() { return default(byte[]); }
+      public void SetValue(byte[] value) { }
+  }
 }
 namespace System.Diagnostics
 {
@@ -3287,7 +3302,11 @@ namespace System.Diagnostics
     [System.AttributeUsageAttribute((System.AttributeTargets)(3), AllowMultiple = false)]
     public sealed partial class DebuggableAttribute : System.Attribute
     {
+        public DebuggableAttribute(bool isJITTrackingEnabled, bool isJITOptimizerDisabled) { }
         public DebuggableAttribute(System.Diagnostics.DebuggableAttribute.DebuggingModes modes) { }
+        public System.Diagnostics.DebuggableAttribute.DebuggingModes DebuggingFlags { get { throw null; } }
+        public bool IsJITOptimizerDisabled { get { throw null; } }
+        public bool IsJITTrackingEnabled { get { throw null; } }
         [System.FlagsAttribute]
         public enum DebuggingModes
         {
@@ -5613,9 +5632,10 @@ namespace System.Runtime.ExceptionServices
 }
 namespace System.Runtime.InteropServices
 {
-    public enum CharSet
-    {
+    public enum CharSet {
         Ansi = 2,
+        Auto = 4,
+        None = 1,
         Unicode = 3,
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(5597), Inherited = false)]

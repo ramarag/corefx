@@ -155,6 +155,15 @@ namespace System.Runtime.Serialization
         public virtual System.Runtime.Serialization.ISerializationSurrogate GetSurrogate(System.Type type, System.Runtime.Serialization.StreamingContext context, out System.Runtime.Serialization.ISurrogateSelector selector) { selector = default(System.Runtime.Serialization.ISurrogateSelector); return default(System.Runtime.Serialization.ISerializationSurrogate); }
         public virtual void RemoveSurrogate(System.Type type, System.Runtime.Serialization.StreamingContext context) { }
     }
+    public interface ISafeSerializationData
+    {
+        void CompleteDeserialization(object deserialized);
+    }
+    public sealed class SafeSerializationEventArgs : EventArgs
+    {
+        public void AddSerializedState(ISafeSerializationData serializedState) {}
+        public StreamingContext StreamingContext;
+    }
 } // end of System.Runtime.Serialization
 namespace System.Runtime.Serialization.Formatters
 {
