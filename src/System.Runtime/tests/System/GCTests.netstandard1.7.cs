@@ -86,6 +86,15 @@ namespace System.Tests
             Assert.True(GC.TryStartNoGCRegion(1024, 1024, true));
             Assert.Throws<InvalidOperationException>(() => GC.TryStartNoGCRegion(1024, 1024, true));
 
+            Assert.True(GC.TryStartNoGCRegion(1024, true));
+            Assert.Equal(GCSettings.LatencyMode, GCLatencyMode.NoGCRegion);
+
+            Assert.Throws<InvalidOperationException>(() => GCSettings.LatencyMode = GCLatencyMode.LowLatency);
+
+            // To ensure that We are not in NoGCRegion
+            if (GCSettings.LatencyMode == GCLatencyMode.NoGCRegion)
+                GC.EndNoGCRegion();
+                
             Assert.True(GC.TryStartNoGCRegion(1024));
             Assert.Equal(GCSettings.LatencyMode, GCLatencyMode.NoGCRegion);
             GC.EndNoGCRegion();
