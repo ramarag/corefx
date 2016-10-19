@@ -56,7 +56,6 @@ namespace System.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => GC.WaitForFullGCApproach(-2));
             Assert.Throws<ArgumentOutOfRangeException>(() => GC.WaitForFullGCComplete(-2));
         }
-
         [Fact]
         public static void GCNotifiicationTests()
         {
@@ -70,42 +69,11 @@ namespace System.Tests
             Assert.True(TestWait(false, int.MaxValue));
 
         }
-        //    [Fact]
-        public static void EndNoGCRegionTest()
-        {
-            Assert.Throws<InvalidOperationException>(() => GC.EndNoGCRegion());
-
-            Assert.True(GC.TryStartNoGCRegion(1024, true));
-            Assert.Equal(GCSettings.LatencyMode, GCLatencyMode.NoGCRegion);
-            GCSettings.LatencyMode = GCLatencyMode.LowLatency;
-            Assert.Throws<InvalidOperationException>(() => GC.EndNoGCRegion());
-
-        }
         [Fact]
         public static void TryStartNoGCRegionTest()
         {
 
-            Assert.True(GC.TryStartNoGCRegion(1024));
-            Assert.Equal(GCSettings.LatencyMode, GCLatencyMode.NoGCRegion);
-            GC.EndNoGCRegion();
-
-            Assert.True(GC.TryStartNoGCRegion(1024, true));
-            Assert.Equal(GCSettings.LatencyMode, GCLatencyMode.NoGCRegion);
-            GC.EndNoGCRegion();
-
-            Assert.True(GC.TryStartNoGCRegion(1024, 1024));
-            Assert.Equal(GCSettings.LatencyMode, GCLatencyMode.NoGCRegion);
-            GC.EndNoGCRegion();
-
-            Assert.True(GC.TryStartNoGCRegion(1024, 1024, true));
-            Assert.Equal(GCSettings.LatencyMode, GCLatencyMode.NoGCRegion);
-            GC.EndNoGCRegion();
-
-        }
-        [Fact]
-        public static void TryStartNoGCRegionNegTest()
-        {
-
+            Assert.Throws<InvalidOperationException>(() => GC.EndNoGCRegion());
             Assert.True(GC.TryStartNoGCRegion(1024));
             Assert.Throws<InvalidOperationException>(() => GC.TryStartNoGCRegion(1024));
 
@@ -117,6 +85,31 @@ namespace System.Tests
 
             Assert.True(GC.TryStartNoGCRegion(1024, 1024, true));
             Assert.Throws<InvalidOperationException>(() => GC.TryStartNoGCRegion(1024, 1024, true));
+
+            Assert.True(GC.TryStartNoGCRegion(1024));
+            Assert.Equal(GCSettings.LatencyMode, GCLatencyMode.NoGCRegion);
+            GC.EndNoGCRegion();
+
+            Assert.True(GC.TryStartNoGCRegion(1024, true));
+            Assert.Equal(GCSettings.LatencyMode, GCLatencyMode.NoGCRegion);
+            GC.EndNoGCRegion();
+
+            Assert.True(GC.TryStartNoGCRegion(1024, 1024));
+            Assert.Equal(GCSettings.LatencyMode, GCLatencyMode.NoGCRegion);
+            GC.EndNoGCRegion();
+
+            Assert.True(GC.TryStartNoGCRegion(1024, 1024, true));
+            Assert.Equal(GCSettings.LatencyMode, GCLatencyMode.NoGCRegion);
+            GC.EndNoGCRegion();
+
+            Assert.True(GC.TryStartNoGCRegion(1024, true));
+            Assert.Equal(GCSettings.LatencyMode, GCLatencyMode.NoGCRegion);
+
+            Assert.Throws<InvalidOperationException>(() => GCSettings.LatencyMode = GCLatencyMode.LowLatency);
+
+            // To ensure that We are not in NoGCRegion
+            if (GCSettings.LatencyMode == GCLatencyMode.NoGCRegion)
+                GC.EndNoGCRegion();
         }
 
         public static bool TestWait(bool approach, int timeout)
