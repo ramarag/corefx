@@ -5,7 +5,6 @@
 using System.Collections.Concurrent;
 using System.Globalization;
 using System.Reflection;
-using System.Runtime.Remoting.Messaging;
 
 namespace System.Runtime.Serialization.Formatters.Binary
 {

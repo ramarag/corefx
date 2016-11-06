@@ -4,7 +4,6 @@
 
 using System.IO;
 using System.Collections.Generic;
-using System.Runtime.Remoting.Messaging;
 using System.Runtime.InteropServices;
 
 namespace System.Runtime.Serialization.Formatters.Binary
@@ -40,65 +39,8 @@ namespace System.Runtime.Serialization.Formatters.Binary
 
         public object Deserialize(Stream serializationStream) => Deserialize(serializationStream, null);
 
-        internal object Deserialize(Stream serializationStream, HeaderHandler handler, bool check)
-        {
-            if (serializationStream == null)
-            {
-                throw new ArgumentNullException(nameof(serializationStream));
-            }
-            if (serializationStream.CanSeek && (serializationStream.Length == 0))
-            {
-                throw new SerializationException(SR.Serialization_Stream);
-            }
-
-            var formatterEnums = new InternalFE()
-            {
-                _typeFormat = _typeFormat,
-                _serializerTypeEnum = InternalSerializerTypeE.Binary,
-                _assemblyFormat = _assemblyFormat,
-                _securityLevel = _securityLevel,
-            };
-
-            var reader = new ObjectReader(serializationStream, _surrogates, _context, formatterEnums, _binder)
-            {
-                _crossAppDomainArray = _crossAppDomainArray
-            };
-            var parser = new BinaryParser(serializationStream, reader);
-            return reader.Deserialize(handler, parser, check);
-        }
-
-        public object Deserialize(Stream serializationStream, HeaderHandler handler) => 
-            Deserialize(serializationStream, handler, check: true);
-
-        [ComVisible(false)]
-        public object UnsafeDeserialize(Stream serializationStream, HeaderHandler handler) => 
-            Deserialize(serializationStream, handler, check: false);
-
         public void Serialize(Stream serializationStream, object graph) => 
             Serialize(serializationStream, graph, headers: null);
-
-        public void Serialize(Stream serializationStream, object graph, Header[] headers) => 
-            Serialize(serializationStream, graph, headers, check: true);
-
-        internal void Serialize(Stream serializationStream, object graph, Header[] headers, bool check)
-        {
-            if (serializationStream == null)
-            {
-                throw new ArgumentNullException(nameof(serializationStream));
-            }
-
-            var formatterEnums = new InternalFE()
-            {
-                _typeFormat = _typeFormat,
-                _serializerTypeEnum = InternalSerializerTypeE.Binary,
-                _assemblyFormat = _assemblyFormat,
-            };
-
-            var sow = new ObjectWriter(_surrogates, _context, formatterEnums, _binder);
-            BinaryFormatterWriter binaryWriter = new BinaryFormatterWriter(serializationStream, sow, _typeFormat);
-            sow.Serialize(graph, headers, binaryWriter, check);
-            _crossAppDomainArray = sow._crossAppDomainArray;
-        }
 
         internal static TypeInformation GetTypeInformation(Type type)
         {

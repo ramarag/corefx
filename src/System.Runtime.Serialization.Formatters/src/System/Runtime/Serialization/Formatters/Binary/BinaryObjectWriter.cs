@@ -4,7 +4,6 @@
 
 using System.Reflection;
 using System.Collections.Generic;
-using System.Runtime.Remoting.Messaging;
 
 namespace System.Runtime.Serialization.Formatters.Binary
 {
@@ -21,7 +20,6 @@ namespace System.Runtime.Serialization.Formatters.Binary
 
         private long _topId;
         private string _topName = null;
-        private Header[] _headers;
 
         private InternalFE _formatterEnums;
         private SerializationBinder _binder;
@@ -47,75 +45,6 @@ namespace System.Runtime.Serialization.Formatters.Binary
             _binder = binder;
             _formatterEnums = formatterEnums;
             _objectManager = new SerializationObjectManager(context);
-        }
-
-        // Commences the process of serializing the entire graph.
-        // initialize the graph walker.
-        internal void Serialize(object graph, Header[] inHeaders, BinaryFormatterWriter serWriter, bool fCheck)
-        {
-            if (graph == null)
-            {
-                throw new ArgumentNullException(nameof(graph));
-            }
-            if (serWriter == null)
-            {
-                throw new ArgumentNullException(nameof(serWriter));
-            }
-
-            _serWriter = serWriter;
-            _headers = inHeaders;
-
-            serWriter.WriteBegin();
-            long headerId = 0;
-            object obj;
-            long objectId;
-            bool isNew;
-
-            // allocations if methodCall or methodResponse and no graph
-            _idGenerator = new ObjectIDGenerator();
-            _objectQueue = new Queue<object>();
-            _formatterConverter = new FormatterConverter();
-            _serObjectInfoInit = new SerObjectInfoInit();
-
-            _topId = InternalGetId(graph, false, null, out isNew);
-            headerId = _headers != null ? InternalGetId(_headers, false, null, out isNew) : -1;
-            WriteSerializedStreamHeader(_topId, headerId);
-
-            // Write out SerializedStream header
-            if ((_headers != null) && (_headers.Length > 0))
-            {
-                _objectQueue.Enqueue(_headers);
-            }
-
-            _objectQueue.Enqueue(graph);
-            while ((obj = GetNext(out objectId)) != null)
-            {
-                WriteObjectInfo objectInfo = null;
-
-                // GetNext will return either an object or a WriteObjectInfo. 
-                // A WriteObjectInfo is returned if this object was member of another object
-                if (obj is WriteObjectInfo)
-                {
-                    objectInfo = (WriteObjectInfo)obj;
-                }
-                else
-                {
-                    objectInfo = WriteObjectInfo.Serialize(obj, _surrogates, _context, _serObjectInfoInit, _formatterConverter, this, _binder);
-                    objectInfo._assemId = GetAssemblyId(objectInfo);
-                }
-
-                objectInfo._objectId = objectId;
-                NameInfo typeNameInfo = TypeToNameInfo(objectInfo);
-                Write(objectInfo, typeNameInfo, typeNameInfo);
-                PutNameInfo(typeNameInfo);
-                objectInfo.ObjectEnd();
-            }
-
-            serWriter.WriteSerializationHeaderEnd();
-            serWriter.WriteEnd();
-
-            // Invoke OnSerialized Event
-            _objectManager.RaiseOnSerializedEvent();
         }
 
         internal SerializationObjectManager ObjectManager => _objectManager;

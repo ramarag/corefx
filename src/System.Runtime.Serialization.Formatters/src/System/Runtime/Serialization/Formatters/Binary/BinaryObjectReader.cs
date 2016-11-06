@@ -5,7 +5,6 @@
 using System.Globalization;
 using System.IO;
 using System.Reflection;
-using System.Runtime.Remoting.Messaging;
 using System.Diagnostics;
 
 namespace System.Runtime.Serialization.Formatters.Binary
@@ -25,8 +24,6 @@ namespace System.Runtime.Serialization.Formatters.Binary
         internal bool _isSimpleAssembly = false;
         internal object _handlerObject;
         internal object _topObject;
-        internal Header[] _headers;
-        internal HeaderHandler _handler;
         internal SerObjectInfoInit _serObjectInfoInit;
         internal IFormatterConverter _formatterConverter;
 
@@ -77,67 +74,6 @@ namespace System.Runtime.Serialization.Formatters.Binary
             _context = context;
             _binder = binder;
             _formatterEnums = formatterEnums;
-        }
-
-        internal object Deserialize(HeaderHandler handler, BinaryParser serParser, bool fCheck)
-        {
-            if (serParser == null)
-            {
-                throw new ArgumentNullException(nameof(serParser));
-            }
-
-            _fullDeserialization = false;
-            TopObject = null;
-            _topId = 0;
-
-            _isSimpleAssembly = (_formatterEnums._assemblyFormat == FormatterAssemblyStyle.Simple);
-
-            _handler = handler;
-
-            if (_fullDeserialization)
-            {
-                // Reinitialize
-                _objectManager = new ObjectManager(_surrogates, _context, false, false);
-                _serObjectInfoInit = new SerObjectInfoInit();
-            }
-
-            // Will call back to ParseObject, ParseHeader for each object found
-            serParser.Run();
-
-            if (_fullDeserialization)
-            {
-                _objectManager.DoFixups();
-            }
-
-            if (TopObject == null)
-            {
-                throw new SerializationException(SR.Serialization_TopObject);
-            }
-
-            //if TopObject has a surrogate then the actual object may be changed during special fixup
-            //So refresh it using topID.
-            if (HasSurrogate(TopObject.GetType()) && _topId != 0)//Not yet resolved
-            {
-                TopObject = _objectManager.GetObject(_topId);
-            }
-
-            if (TopObject is IObjectReference)
-            {
-                TopObject = ((IObjectReference)TopObject).GetRealObject(_context);
-            }
-
-            if (_fullDeserialization)
-            {
-                _objectManager.RaiseDeserializationEvent(); // This will raise both IDeserialization and [OnDeserialized] events
-            }
-
-            // Return the headers if there is a handler
-            if (handler != null)
-            {
-                _handlerObject = handler(_headers);
-            }
-
-            return TopObject;
         }
 
         private bool HasSurrogate(Type t)
